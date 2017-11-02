@@ -1,0 +1,33 @@
+{
+  "name": "notifier-service",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npm run build && node dist/app.js",
+    "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files"
+  },
+  "dependencies": {
+    "body-parser": "~1.18.2",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "express": "~4.15.5",
+    "firebase": "^4.6.0",
+    "firebase-admin": "^5.4.3",
+    "jade": "~1.11.0",
+    "mongodb": "^2.2.33",
+    "morgan": "~1.9.0",
+    "redis": "^2.8.0",
+    "serve-favicon": "~2.4.5",
+    "sockjs": "^0.3.19"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "rimraf": "^2.6.2",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.3",
+    "webpack-node-externals": "^1.6.0"
+  }
+}

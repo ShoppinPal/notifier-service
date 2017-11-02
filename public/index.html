@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+    <head>
+        <title>SockJS</title>
+        <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    </head>
+    <body>
+        <script>
+            var sock = new SockJS('http://localhost:3000/echo');
+            sock.onopen = function() {
+                console.log('open');
+                sock.send(JSON.stringify({event: 'USER_AUTHENTICATE', payload: 'test', userId: 'hi'}));
+                //sock.send('test');
+            };
+
+            sock.onmessage = function(e) {
+                console.log('message', e.data);
+                let message = JSON.parse(e.data);
+
+                if(message._id) {
+                    sock.send(JSON.stringify({event: 'NOTIFICATION_RECEIVED_ACK', messageId: message._id, payload: {}}));
+                    console.log('notification ack sent');
+                }
+                //sock.close();
+            };
+
+            sock.onclose = function() {
+                console.log('close');
+            };
+        </script>
+    </body>
+</html>

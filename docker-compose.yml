@@ -1,0 +1,20 @@
+version: "3.1"
+services:
+  notifier-service:
+    build: .
+    env_file: .env
+    command: "npm start"
+    volumes:
+      - ./public:/notifier/public
+    ports:
+      - 3000:3000
+    depends_on:
+     - redis
+     - mongoDB
+  redis:
+    image: redis:alpine
+  mongoDB:
+    image: mongo:3.5
+    ports:
+      - 27017:27017
+
