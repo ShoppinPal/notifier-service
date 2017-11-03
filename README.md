@@ -8,9 +8,9 @@ Steps to run:
 
 3. `touch .env` (Note: As this is skeleton, there is nothing inside `.env` yet. So just create this file and leave it as it is.)
 
-3. `docker-compose up --build`
+4. `docker-compose up --build`
 
-4. Once server is up and running
+5. Once server is up and running
 
     visit `http://localhost:3000`
 

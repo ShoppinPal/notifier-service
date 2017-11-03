@@ -1,6 +1,6 @@
 version: "3.1"
 services:
-  notifier-service:
+  web:
     build: .
     env_file: .env
     command: "npm start"
@@ -11,6 +11,15 @@ services:
     depends_on:
      - redis
      - mongoDB
+  sockjs:
+    build:
+      context: ./notifier
+    command: "npm start"
+    depends_on:
+      - redis
+      - mongoDB
+    ports:
+      - 4000:4000
   redis:
     image: redis:alpine
   mongoDB:

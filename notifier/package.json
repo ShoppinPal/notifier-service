@@ -1,0 +1,22 @@
+{
+  "name": "notifier-service",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npm run build && node dist/sockJS.js",
+    "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files"
+  },
+  "dependencies": {
+    "mongodb": "^2.2.33",
+    "morgan": "~1.9.0",
+    "redis": "^2.8.0",
+    "sockjs": "^0.3.19"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "rimraf": "^2.6.2"
+  }
+}

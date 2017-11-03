@@ -8,10 +8,10 @@ import { fetchMessagesForUser } from './mongoDB';
 //let emitter = null;
 /*
     @param:conn - socket connection
+    Note: If emitter is null, then you forgot to call registerListeners from ./eventListeners file inside sockJS file.
 */
 
 let messageHandlers = (conn, message, users) => {
-    //registerListeners();    // Todo: Move to separate file!
     let messageObject = prepareMessage(message, 'client'); // second argument says message obtained from client
     if(isMessageValid(messageObject)) {
   

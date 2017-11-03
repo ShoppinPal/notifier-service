@@ -1,4 +1,3 @@
-import sockJS from './notifier/sockJS.js';
 import { registerListeners } from './notifier/utils/eventListeners';
 //import { initFCM } from './firebase/FCM-messaging';
 
@@ -44,8 +43,6 @@ app.use(function(req, res, next) {
 
 var server = http.createServer(app);
 // Below code section can be moved to a separate file where we will init sockjs, register listeners and firebase!
-sockJS.createSocketServer(server);
-registerListeners();
 //initFCM();
 /**
  * Listen on provided port, on all network interfaces.
@@ -60,6 +57,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
+  res.message = req.url;
   console.log('Final error handler',err);
   //res.render('error');
 });

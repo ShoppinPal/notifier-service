@@ -1,4 +1,6 @@
 import sockjs from 'sockjs';
+import http from 'http';
+import { registerListeners } from './utils/eventListeners';
 import messageHandlers from './utils/messageHandlers';
 import {isMessageValid, prepareMessage} from './utils/utility';
 import redis from 'redis';
@@ -8,33 +10,6 @@ let subscriber = null;
 
 let users = {};
 let connections = {};
-
-let sockJS = {
-    createSocketServer: (server) => {
-        var echo = sockjs.createServer({ sockjs_url: 'http://cdn.jsdelivr.net/sockjs/1.0.1/sockjs.min.js' });
-        console.log('hello I am working');
-        connectToMongoDB();
-        handleSubscription(users);  // setup redis subscriber for 'notification' channel!
-        echo.on('connection', function(conn) {
-            connections[conn.id] = conn;
-            conn.on('data', function(message) {
-                //conn.write(message);
-                console.log(conn.id);
-                //console.log(users);
-                messageHandlers(conn, message, users);
-            });
-            conn.on('close', function() {
-                cleanupOnDisconnect(conn.id);
-                console.log('connection closed');
-                /**
-                 * Todo: Remove disconnected clients from queue or storage
-                 */
-            });
-        });
-        
-        echo.installHandlers(server, {prefix:'/echo'});
-    }
-}
 
 // handle redis subscription for different channels! Connect to redis subscribe channel.
 // Below code works when warehouse worker notifies certain event to notifier service.
@@ -97,4 +72,32 @@ let sendNotificationToBrowser = (message) => {
     }
 }
 
-export default sockJS;
+var echo = sockjs.createServer({ sockjs_url: 'http://cdn.jsdelivr.net/sockjs/1.0.1/sockjs.min.js' });
+console.log('hello I am working');
+connectToMongoDB();
+handleSubscription(users);  // setup redis subscriber for 'notification' channel!
+echo.on('connection', function(conn) {
+    connections[conn.id] = conn;
+    conn.on('data', function(message) {
+        //conn.write(message);
+        console.log(conn.id);
+        //console.log(users);
+        messageHandlers(conn, message, users);
+    });
+    conn.on('close', function() {
+        cleanupOnDisconnect(conn.id);
+        console.log('connection closed');
+        /**
+         * Todo: Remove disconnected clients from queue or storage
+         */
+    });
+});
+
+var server2 = http.createServer();
+registerListeners();
+echo.installHandlers(server2, {prefix:'/echo'});
+
+server2.listen(4000);
+
+
+//export default sockJS;
