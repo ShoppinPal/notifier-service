@@ -18,7 +18,7 @@ let notificationReceivedAckListener = ({conn, messageId}) => {
     console.log('notificationReceivedAck Listener');
     deleteMessageFromQueue(messageId)
     .then((message) => {
-        conn.write(JSON.stringify({event: 'server', payload: {message: `notification deleted ${messageId}`}}));
+        conn.write(JSON.stringify({event: 'server', payload: {message: `notification deleted from queue: ${messageId}`}}));
     })
     .catch((error) => {
         conn.write(JSON.stringify(error));

@@ -14,3 +14,7 @@ Steps to run:
 
     Open browser console to see socket messages in action.
 
+
+- This notify button impersonates a worker finished processing and is sending a notification to our `notification-service`
+- This demo is using HTML5 browser notifications, we can swap it out with our own notification ui.</li>
+- Open a new browser tab for opening a new socket connection.</li>

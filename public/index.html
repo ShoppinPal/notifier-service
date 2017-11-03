@@ -4,16 +4,27 @@
         <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     </head>
     <body>
-        <h1>Open browser console window to see sockets in action</h1>
+        <h1>Open browser console window to see more info in action</h1>
         <section>
             <input type="text" name="title" id="title" placeholder="Enter random title">
-            <button id="sendNotif" onclick="postMessage()">Notify</button>
+            <button id="sendNotif" onclick="postMessage()">Notify</button> <br/>
+            <ol>
+                <li>This notify button impersonates a worker finished processing and is sending a notification to our notification-service</li>
+                <li>This demo is using HTML5 browser notifications, we can swap it out with our own notification ui.</li>
+                <li>Open a new browser tab for opening a new socket connection.</li>
+            </ol>
+            <section style="display:none" id="disconnected">
+                <h2>Disconnected! Refresh to reconnect!</h2>
+            </section>
         </section>
         <script>
             var sock = new SockJS('http://localhost:3000/echo');
+            var userId = makeid();
+
             sock.onopen = function() {
                 console.log('open');
-                sock.send(JSON.stringify({event: 'USER_AUTHENTICATE', payload: 'test', userId: 'ji'}));
+                sock.send(JSON.stringify({event: 'USER_AUTHENTICATE', payload: 'test', userId: userId}));
+                document.getElementById('disconnected').style.display = 'none';
                 //sock.send('test');
             };
 
@@ -36,6 +47,7 @@
 
             sock.onclose = function() {
                 console.log('close');
+                document.getElementById('disconnected').style.display = 'block';
             };
 
             function notifyMe(message) {
@@ -75,29 +87,47 @@
             function postMessage() {
                 var title = document.getElementById('title').value;
 
-                fetch('http://localhost:3000/users/sockJS/notify', {
-                    method: 'post',
-                    body: JSON.stringify({
-                        "notification": {
-                            "title": title,
-                            "userId": "ji",
-                            "event": "WORKER_NOTIFICATION",
-                            "payload": {
-                                
+                if(title) {
+                    fetch('http://localhost:3000/users/sockJS/notify', {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin':'*',
+                        },
+                        body: JSON.stringify({
+                            "notification": {
+                                "title": title,
+                                "userId": userId,
+                                "event": "WORKER_NOTIFICATION",
+                                "payload": {
+                                    
+                                }
                             }
-                        }
+                        })
                     })
-                })
-                .then((response) => {
-                    if(response.status === 200) return response.json();
-                    throw new Error('Something went wrong on api server!');
-                })
-                .then((result) => {
-                    console.log(result);
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+                    .then((response) => {
+                        if(response.status === 200) return response.json();
+                        throw new Error('Something went wrong on api server!');
+                    })
+                    .then((result) => {
+                        console.log(result);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+                }else {
+                    alert('Please enter some title');
+                }
+            }
+
+            function makeid() {
+                var text = "";
+                var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+                for (var i = 0; i < 5; i++)
+                    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+                return text;
             }
         </script>
     </body>
