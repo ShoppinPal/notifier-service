@@ -2,7 +2,7 @@
 
 Steps to run:
 
-1. Git clone
+1. git clone https://github.com/yogesh8177/sockjs-notifier.git
 
 2. `cd notifier-service`
 
