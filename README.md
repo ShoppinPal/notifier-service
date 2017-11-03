@@ -17,6 +17,6 @@ Steps to run:
     Open browser console to see socket messages in action.
 
 
-- The notify button on web page simulates a worker finished processing and is sending a notification to our `notification-service`. Look at our server logs in the terminal for infering server activities.
+- The notify button on web page simulates: a worker finished processing and is sending a notification to our `notification-service`. Look at our server logs in the terminal for infering server activities.
 - This demo is using HTML5 browser notifications, we can swap it out with our own notification UI.</li>
 - Open a new browser tab for opening a new socket connection.</li>
