@@ -6,7 +6,7 @@ Steps to run:
 
 2. `cd notifier-service`
 
-3. `touch .env` (note as this is skeleton, there is nothing inside `.env` yet. So just create this file and leave it as it is.
+3. `touch .env` (Note: As this is skeleton, there is nothing inside `.env` yet. So just create this file and leave it as it is.)
 
 3. `docker-compose up --build`
 
