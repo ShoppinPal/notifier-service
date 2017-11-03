@@ -37,7 +37,6 @@ let fetchMessagesForUser = (userId) => {
                 if (err) {
                     return reject(err);
                 }
-                console.log('returned messages', typeof messages);
                 return resolve(messages);
             });
         })

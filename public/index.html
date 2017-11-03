@@ -4,28 +4,101 @@
         <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     </head>
     <body>
+        <h1>Open browser console window to see sockets in action</h1>
+        <section>
+            <input type="text" name="title" id="title" placeholder="Enter random title">
+            <button id="sendNotif" onclick="postMessage()">Notify</button>
+        </section>
         <script>
             var sock = new SockJS('http://localhost:3000/echo');
             sock.onopen = function() {
                 console.log('open');
-                sock.send(JSON.stringify({event: 'USER_AUTHENTICATE', payload: 'test', userId: 'hi'}));
+                sock.send(JSON.stringify({event: 'USER_AUTHENTICATE', payload: 'test', userId: 'ji'}));
                 //sock.send('test');
             };
 
             sock.onmessage = function(e) {
                 console.log('message', e.data);
-                let message = JSON.parse(e.data);
+                try{
+                    let message = JSON.parse(e.data);
 
-                if(message._id) {
-                    sock.send(JSON.stringify({event: 'NOTIFICATION_RECEIVED_ACK', messageId: message._id, payload: {}}));
-                    console.log('notification ack sent');
+                    if(message._id) {
+                        notifyMe(message);
+                        sock.send(JSON.stringify({event: 'NOTIFICATION_RECEIVED_ACK', messageId: message._id, payload: {}}));
+                        console.log('notification ack sent');
+                    }
+                }catch (e) {
+                    // hmm.....
                 }
+                
                 //sock.close();
             };
 
             sock.onclose = function() {
                 console.log('close');
             };
+
+            function notifyMe(message) {
+                // Let's check if the browser supports notifications
+                if (!("Notification" in window)) {
+                    alert("This browser does not support desktop notification");
+                }
+
+                // Let's check whether notification permissions have already been granted
+                else if (Notification.permission === "granted") {
+                    // If it's okay let's create a notification
+                    var options = {
+                        body: message.body,
+                        requireInteraction: true
+                    }
+                    var notification = new Notification(message.title, options);
+                }
+
+                // Otherwise, we need to ask the user for permission
+                else if (Notification.permission !== "denied") {
+                    Notification.requestPermission(function (permission) {
+                    // If the user accepts, let's create a notification
+                    if (permission === "granted") {
+                        var options = {
+                            body: message.body,
+                            requireInteraction: true
+                        }
+                        var notification = new Notification(message.title, options);
+                    }
+                    });
+                }
+
+                // At last, if the user has denied notifications, and you 
+                // want to be respectful there is no need to bother them any more.
+            }
+
+            function postMessage() {
+                var title = document.getElementById('title').value;
+
+                fetch('http://localhost:3000/users/sockJS/notify', {
+                    method: 'post',
+                    body: JSON.stringify({
+                        "notification": {
+                            "title": title,
+                            "userId": "ji",
+                            "event": "WORKER_NOTIFICATION",
+                            "payload": {
+                                
+                            }
+                        }
+                    })
+                })
+                .then((response) => {
+                    if(response.status === 200) return response.json();
+                    throw new Error('Something went wrong on api server!');
+                })
+                .then((result) => {
+                    console.log(result);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+            }
         </script>
     </body>
 </html>

@@ -54,27 +54,7 @@ let handleSubscription  = (users) => {
     
         switch (channel) {
             case 'notification':
-                let notif = prepareMessage(message, 'worker');
-                console.log('notification', notif);
-                if (isMessageValid(notif) && users[notif.userId]) { // If active connection for notif.userId exists, send notification!
-                    let socketId = users[notif.userId];
-                    addMessageToDB(notif).then(() => {
-                        connections[socketId].write(JSON.stringify(notif));
-                        console.log('Notification sent to browser');
-                    })
-                    .catch((error) => {
-                        console.log('Error occured while inserting into mongodb', error);
-                    });
-                }else {
-                    addMessageToDB(notif)
-                    .then(() => {
-                        console.log('Client was not available so message queued into database');
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-                    console.log('Invalid notif format or userId not found!');
-                }
+                sendNotificationToBrowser(message);
             break;
 
             default:
@@ -88,6 +68,33 @@ let cleanupOnDisconnect = (socketId) => {
     delete connections[socketId]; // clean up connections object!
     console.log(connections);
     // todo: cleanup users object! Maybe introduce one connectionsUsersMapping object!
+}
+
+let sendNotificationToBrowser = (message) => {
+    let notif = prepareMessage(message, 'worker');
+    //console.log('notification', notif);
+    if (isMessageValid(notif)) { 
+        if(users[notif.userId]) { // If active connection for notif.userId exists, send notification!
+            let socketId = users[notif.userId];
+            addMessageToDB(notif).then(() => {
+                connections[socketId].write(JSON.stringify(notif));
+                console.log('Notification sent to browser');
+            })
+            .catch((error) => {
+                console.log('Error occured while inserting into mongodb', error);
+            });
+        }else {
+            addMessageToDB(notif)
+            .then(() => {
+                console.log('Client was not available so message queued into database');
+            })
+            .catch((error) => {
+                console.log('Error occured while inserting into mongodb', error);
+            });
+        }                 
+    }else {
+        console.log('Invalid notification format or userId not found!');
+    }
 }
 
 export default sockJS;
