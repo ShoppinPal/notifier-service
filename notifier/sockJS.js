@@ -10,6 +10,7 @@ let subscriber = null;
 
 let users = {};
 let connections = {};
+let connectionToUserMapping = {};
 
 // handle redis subscription for different channels! Connect to redis subscribe channel.
 // Below code works when warehouse worker notifies certain event to notifier service.
@@ -41,7 +42,20 @@ let handleSubscription  = (users) => {
 
 let cleanupOnDisconnect = (socketId) => {
     delete connections[socketId]; // clean up connections object!
-    console.log(connections);
+    let userId = connectionToUserMapping[socketId];
+    if (users[userId] && Array.isArray(users[userId])) {
+        let index = users[userId].indexOf(socketId);
+
+        if (index >= 0) {
+            users[userId].splice(index, 1);
+        }
+    }
+    delete connectionToUserMapping[socketId];
+    console.log('Clearing objects on disconnect........\n\n');
+    console.log('connections:', connections);
+    console.log('users:', users);
+    console.log(connectionToUserMapping);
+    console.log('\n\n');
     // todo: cleanup users object! Maybe introduce one connectionsUsersMapping object!
 }
 
@@ -50,9 +64,13 @@ let sendNotificationToBrowser = (message) => {
     //console.log('notification', notif);
     if (isMessageValid(notif)) { 
         if(users[notif.userId]) { // If active connection for notif.userId exists, send notification!
-            let socketId = users[notif.userId];
+            let socketIds = users[notif.userId];
             addMessageToDB(notif).then(() => {
-                connections[socketId].write(JSON.stringify(notif));
+                socketIds.forEach((socketId) => {
+                    if (connections[socketId]) {
+                        connections[socketId].write(JSON.stringify(notif));
+                    }
+                });
                 console.log('Notification sent to browser');
             })
             .catch((error) => {
@@ -80,9 +98,9 @@ echo.on('connection', function(conn) {
     connections[conn.id] = conn;
     conn.on('data', function(message) {
         //conn.write(message);
-        console.log(conn.id);
+        //console.log(conn.id);
         //console.log(users);
-        messageHandlers(conn, message, users);
+        messageHandlers(conn, connectionToUserMapping, message, users);
     });
     conn.on('close', function() {
         cleanupOnDisconnect(conn.id);
@@ -94,10 +112,11 @@ echo.on('connection', function(conn) {
 });
 
 var server2 = http.createServer();
+
 registerListeners();
 echo.installHandlers(server2, {prefix:'/echo'});
 
 server2.listen(4000);
 
 
-//export default sockJS;
+export {connections};

@@ -63,6 +63,32 @@ let deleteMessageFromQueue = (id) => {
     });
 }
 
+let deleteBulkMessagesFromQueue = (ids) => {
+    return new Promise((resolve, reject) => {
+        if (Array.isArray(ids)) {
+            checkDatabaseObject(_db)
+            .then((DB) => {
+                let idsToDelete = [];
+                ids.forEach((id) => {
+                    idsToDelete.push(new ObjectID(id));
+                });
+                DB.collection('queue').deleteMany({_id: {$in: idsToDelete}}, (err, message) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve(message);
+                });
+            })
+            .catch((error) => {
+                return reject(error);
+            });
+        }else {
+            return reject('deleteBulkMessageFromQueue(ids): ids array invalid');
+            console.log('deleteBulkMessageFromQueue(ids): ids array invalid');
+        }
+    });
+}
+
 let disconnectDatabaseObject = (_db) => {
     checkDatabaseObject(_db)
     .then((DB) => {
@@ -83,4 +109,4 @@ let checkDatabaseObject = (_db) => {
     })
 }
 
-export {connectToMongoDB, addMessageToDB, fetchMessagesForUser, deleteMessageFromQueue, disconnectDatabaseObject};
+export {connectToMongoDB, addMessageToDB, fetchMessagesForUser, deleteMessageFromQueue, deleteBulkMessagesFromQueue, disconnectDatabaseObject};
