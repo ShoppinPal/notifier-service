@@ -1,6 +1,7 @@
 import sockjs from 'sockjs';
 import http from 'http';
 import { registerListeners } from './utils/eventListeners';
+import { isAuthentic } from './utils/authenticate';
 import messageHandlers from './utils/messageHandlers';
 import {isMessageValid, prepareMessage} from './utils/utility';
 import redis from 'redis';
@@ -95,7 +96,13 @@ console.log('hello I am working');
 connectToMongoDB();
 handleSubscription(users);  // setup redis subscriber for 'notification' channel!
 echo.on('connection', function(conn) {
-    connections[conn.id] = conn;
+    isAuthentic(conn.url)
+    .then(() => {
+        connections[conn.id] = conn;
+    })
+    .catch(() => {
+        conn.close();
+    });
     conn.on('data', function(message) {
         //conn.write(message);
         //console.log(conn.id);

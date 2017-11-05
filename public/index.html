@@ -18,7 +18,7 @@
             </section>
         </section>
         <script>
-            var sock = new SockJS('http://localhost:4000/echo');
+            var sock = new SockJS('http://localhost:4000/echo?token=qweq');
             var userId = makeid();
 
             sock.onopen = function() {

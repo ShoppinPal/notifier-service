@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import {emitter} from './eventListeners';
 import * as constants from './eventConstants';
-import {isAuthentic} from './authenticate';
+import {isUserValid} from './authenticate';
 import {isMessageValid, prepareMessage} from './utility';
 import { fetchMessagesForUser } from './mongoDB';
 
@@ -21,17 +21,17 @@ let messageHandlers = (conn, connectionToUserMapping, message, users) => {
 
         switch (messageObject.event) {
             case constants.USER_AUTHENTICATE:
- 
-                if (isAuthentic(userId)) {
+                isUserValid(userId)
+                .then(() => {
                     addToUsersList(users, userId, conn.id, connectionToUserMapping);
                     emitter.emit(constants.USER_AUTHENTICATED, conn);
                     //users[userId] = conn.id;
                     //fetchFromDBAndNotify(conn, userId); // fetch previous notifications from database that were not delivered due to client was not connected!
                     console.log(users);
-                }
-                else {
+                })
+                .catch(() => {
                     emitter.emit(constants.AUTH_ERROR, conn);
-                }
+                });
             break;
 
             case constants.USER_AUTHENTICATED:
