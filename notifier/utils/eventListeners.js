@@ -70,7 +70,7 @@ let notificationReceivedAckListener = ({conn, messageId}) => {
     });
     
 }
-// No need to use cache here as only one socket will send ack for received messages.
+// No need to use cache here as only one socket will send ack for received messages (fetching history).
 let notificationBulkReceivedAckListener = ({conn, messageIds}) => {
     console.log('bulkNotificationReceivedAck Listener');
     // TODO: Refactor below code using async.series so that it is more readable!
