@@ -1,4 +1,4 @@
-import { registerListeners } from './notifier/utils/eventListeners';
+
 //import { initFCM } from './firebase/FCM-messaging';
 
 var express = require('express');

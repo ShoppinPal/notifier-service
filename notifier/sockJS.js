@@ -9,9 +9,11 @@ import { connectToMongoDB, addMessageToDB } from './utils/mongoDB';
 
 let subscriber = null;
 
+// In memory data stores
 let users = {};
 let connections = {};
 let connectionToUserMapping = {};
+let messageIdsCache = {};
 
 // handle redis subscription for different channels! Connect to redis subscribe channel.
 // Below code works when warehouse worker notifies certain event to notifier service.
@@ -107,6 +109,7 @@ echo.on('connection', function(conn) {
         //conn.write(message);
         //console.log(conn.id);
         //console.log(users);
+        console.log('Cache', messageIdsCache);
         messageHandlers(conn, connectionToUserMapping, message, users);
     });
     conn.on('close', function() {
@@ -126,4 +129,4 @@ echo.installHandlers(server2, {prefix:'/echo'});
 server2.listen(4000);
 
 
-export {connections};
+export {connections, messageIdsCache};

@@ -1,6 +1,12 @@
 import { EventEmitter } from 'events';
 import * as constants from './eventConstants';
-import { deleteMessageFromQueue, deleteBulkMessagesFromQueue, fetchMessagesForUser } from './mongoDB';
+import { addMessageIdToCache, markToDeleteMessageIdFromCache } from './utility';
+import { 
+    deleteMessageFromQueue,
+    addNotifiedMessagesToHistory,
+    deleteBulkMessagesFromQueue, 
+    fetchMessagesForUser 
+} from './mongoDB';
 
 let emitter = null;
 
@@ -21,23 +27,66 @@ let fetchNotificationHistoryListener = ({conn, userId}) => {
 
 let notificationReceivedAckListener = ({conn, messageId}) => {
     console.log('notificationReceivedAck Listener');
-    deleteMessageFromQueue(messageId)
-    .then((message) => {
-        conn.write(JSON.stringify({event: constants.MESSAGES_DELETED, payload: {message: `notification deleted from queue: ${messageId}`}}));
+    // TODO: Refactor below code using async.series so that it is more readable!
+
+    // Add messageId to cache if not already present.
+    addMessageIdToCache(messageId)
+    .then((response) => {
+        if (response.state === constants.SKIP_DELETE_FROM_QUEUE) {
+            // messageId already inside cache. It means it will be deleted from queue by previous request.
+            console.log(response.message);
+        }else if (response.state === constants.DELETE_FROM_QUEUE) {
+            // messageId does not exist in cache
+            console.log(response.message);
+            // (1) Move notified messages to notifHistory collection from queue collection
+            addNotifiedMessagesToHistory(messageId)
+            .then((responseText) => {
+                // (2) Delete message from mongodb queue collection
+                console.log(responseText);
+                deleteMessageFromQueue(messageId)
+                .then((message) => {
+                    // (3) Once messageId is deleted from queue, update cache to mark it for deletion.
+                    markToDeleteMessageIdFromCache(messageId)
+                    .then((responseText) => {
+                        console.log(responseText);
+                    })
+                    .catch((errorText) => {
+                        console.log(errorText);
+                    });
+                    // (2.1) If messageId is deleted from queue notify client (this step is added to make testing easier, we can skip it on production)
+                    conn.write(JSON.stringify({ event: constants.MESSAGES_DELETED, payload: { message: `notification deleted from queue: ${messageId}` } }));
+                })
+                .catch((error) => {
+                    conn.write(JSON.stringify(error));
+                });
+            })
+            .catch((error) => {
+                console.log('Error moving notified message to notifHistory', error);
+            });
+        }
     })
     .catch((error) => {
-        conn.write(JSON.stringify(error));
+        console.log('Could not add to messageIdCache', error);
     });
+    
 }
-
+// No need to use cache here as only one socket will send ack for received messages.
 let notificationBulkReceivedAckListener = ({conn, messageIds}) => {
     console.log('bulkNotificationReceivedAck Listener');
-    deleteBulkMessagesFromQueue(messageIds)
-    .then((message) => {
-        conn.write(JSON.stringify({event: constants.BULK_MESSAGES_DELETED, payload: {message: `notification deleted from queue: ${messageIds}`}}));
+    // TODO: Refactor below code using async.series so that it is more readable!
+    addNotifiedMessagesToHistory(messageIds)
+    .then((responseText) => {
+        console.log(responseText);
+        deleteBulkMessagesFromQueue(messageIds)
+        .then((message) => {
+            conn.write(JSON.stringify({event: constants.BULK_MESSAGES_DELETED, payload: {message: `notification deleted from queue: ${messageIds}`}}));
+        })
+        .catch((error) => {
+            conn.write(JSON.stringify(error));
+        });
     })
     .catch((error) => {
-        conn.write(JSON.stringify(error));
+        console.log('Error moving notified messages to notifHistory', error);
     });
 }
 

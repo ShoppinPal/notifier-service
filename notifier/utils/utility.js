@@ -1,4 +1,6 @@
 import { INVALID_JSON } from './eventConstants';
+import * as constants from './eventConstants';
+import { messageIdsCache } from '../sockJS';
 /* Utility functions */
 
 let isMessageValid = (message) => {
@@ -22,4 +24,31 @@ let prepareMessage = (message, source) => {
     }
 }
 
-export {isMessageValid, prepareMessage};
+let addMessageIdToCache = (messageId) => {
+    return new Promise((resolve, reject) => {
+        if (!messageId) return reject(`Invalid messageId: ${messageId}`);
+
+        if (messageIdsCache[messageId]) {
+            // If messageId already in cache: Back off and don't proceed to make a DB call to delete it from mongodb Queue.
+            return resolve({state: constants.SKIP_DELETE_FROM_QUEUE, message:'messageId cache hit, skip mongo call'});
+        }else {
+            // add this messageId to cache so that subsequent message ack do not make mongodb calls.
+            // Proceed and make a mongodb call to delete message with given messageId in the next step. 
+            messageIdsCache[messageId] = {state: constants.STATE_DELETING, time: Date()};
+            return resolve({state: constants.DELETE_FROM_QUEUE, message: 'messageId added to cache, calling mongo to delete it in next step'});
+        }
+    });
+}
+
+let markToDeleteMessageIdFromCache = (messageId) => {
+    return new Promise((resolve, reject) => {
+        if (!messageId) return reject(`Invalid messageId: ${messageId}`);
+
+        if (messageIdsCache[messageId]) {
+            messageIdsCache[messageId] = { state: constants.STATE_DELETED, time: Date() };
+            return resolve(`${messageId} marked for deletion from cache`);
+        }
+    });
+}
+
+export {isMessageValid, prepareMessage, addMessageIdToCache, markToDeleteMessageIdFromCache};
