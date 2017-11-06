@@ -81,27 +81,5 @@ let addToUsersList = (users, userId, socketId, connectionToUserMapping) => {
     }
     console.log('Total users', users);
 }
-// load data from history and notify the clients that connected now!
-let fetchFromDBAndNotify = (conn, userId) => {
-    console.log('fetching from db...');
-    return new Promise((resolve, reject) => {
-        fetchMessagesForUser(userId)
-        .then((messages) => {
-            console.log(messages);
-            // todo: improvement for sending it as a bulk notificaton!
-            if (Array.isArray(messages)) {
-                messages.forEach((message) => {
-                    conn.write(JSON.stringify(message));
-                });
-                return resolve();
-            }else {
-                console.log('MongoDB Error while fetching notifications for', userId);
-            }
-        })
-        .catch((error) => {
-            return reject(error); 
-        });
-    });
-}
 
 export default messageHandlers;

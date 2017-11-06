@@ -72,9 +72,9 @@ let sendNotificationToBrowser = (message) => {
                 socketIds.forEach((socketId) => {
                     if (connections[socketId]) {
                         connections[socketId].write(JSON.stringify(notif));
+                        console.log('Notification sent to client');
                     }
                 });
-                console.log('Notification sent to browser');
             })
             .catch((error) => {
                 console.log('Error occured while inserting into mongodb', error);
