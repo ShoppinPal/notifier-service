@@ -40,15 +40,15 @@ let addMessageIdToCache = (messageId) => {
     });
 }
 
-let markToDeleteMessageIdFromCache = (messageId) => {
+let deleteMessageIdFromCache = (messageId) => {
     return new Promise((resolve, reject) => {
         if (!messageId) return reject(`Invalid messageId: ${messageId}`);
 
         if (messageIdsCache[messageId]) {
-            messageIdsCache[messageId] = { state: constants.STATE_DELETED, time: Date() };
-            return resolve(`${messageId} marked for deletion from cache`);
+            delete messageIdsCache[messageId];
+            return resolve(`${messageId} deleted from cache`);
         }
     });
 }
 
-export {isMessageValid, prepareMessage, addMessageIdToCache, markToDeleteMessageIdFromCache};
+export {isMessageValid, prepareMessage, addMessageIdToCache, deleteMessageIdFromCache};

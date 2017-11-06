@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import * as constants from './eventConstants';
-import { addMessageIdToCache, markToDeleteMessageIdFromCache } from './utility';
+import { addMessageIdToCache, deleteMessageIdFromCache } from './utility';
 import { 
     deleteMessageFromQueue,
     addNotifiedMessagesToHistory,
@@ -46,7 +46,7 @@ let notificationReceivedAckListener = ({conn, messageId}) => {
                 deleteMessageFromQueue(messageId)
                 .then((message) => {
                     // (3) Once messageId is deleted from queue, update cache to mark it for deletion.
-                    markToDeleteMessageIdFromCache(messageId)
+                    deleteMessageIdFromCache(messageId)
                     .then((responseText) => {
                         console.log(responseText);
                     })
