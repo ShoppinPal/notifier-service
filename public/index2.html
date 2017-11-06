@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<head>
+    <title>SockJS</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+</head>
+<body>
+    <h1>Open browser console window to see more info in action</h1>
+    <section>
+        <input type="text" name="title" id="title" placeholder="Enter random title">
+        <button id="sendNotif" onclick="postMessage()">Notify</button> <br/>
+        <ol>
+            <li>Tjis notify button impersonates a worker finished processing and is sending a notification to our notification-service</li>
+            <li>Tjis demo is using HTML5 browser notifications, we can swap it out with our own notification ui.</li>
+            <li>Open a new browser tab for opening a new socket connection.</li>
+        </ol>
+        <section style="display:none" id="disconnected">
+            <h2>Disconnected! Refresh to reconnect!</h2>
+        </section>
+    </section>
+    <script>
+        var sock = new SockJS('http://localhost:4000/echo?token=qweq');
+        var userId = makeid();
+
+        sock.onopen = function() {
+            console.log('open');
+            sock.send(JSON.stringify({event: 'USER_AUTHENTICATE', payload: 'test', userId: 'ji'}));
+            document.getElementById('disconnected').style.display = 'none';
+            //sock.send('test');
+        };
+
+        sock.onmessage = function(e) {
+            console.log('message', e.data);
+            try{
+                let message = JSON.parse(e.data);
+
+                switch (message.event) {
+                    case 'USER_AUTHENTICATED':
+                        console.log('fetcjing jistory...');
+                        sock.send(JSON.stringify({event: 'USER_FETCH_NOTIFICATION_HISTORY', payload: {}, userId: 'ji'}));
+                    break;
+
+                    case 'WORKER_NOTIFICATION':
+                        notifyMe(message);
+                        sock.send(JSON.stringify({event: 'NOTIFICATION_RECEIVED_ACK', messageId: message._id, payload: {}, userId: 'ji'}));
+                        console.log('notification ack sent');
+                    break;
+
+                    case 'NOTIFICATION_HISTORY':
+                        let ids = [];
+                        message.notifications.forEach((notif) => {
+                            ids.push(notif._id);
+                            notifyMe(notif);
+                        });
+                        sock.send(JSON.stringify({event: 'NOTIFICATION_BULK_RECEIVED_ACK', payload: {}, messageIds: ids, userId: 'ji'}));
+                    break;
+
+                    case 'NOTIFICATION_HISTORY_EMPTY':
+                        console.log('Up to date with notifications!');
+                    break;
+
+                    case 'MESSAGES_DELETED':
+
+                    break;
+
+                    case 'BULK_MESSAGES_DELETED':
+
+                    break;
+
+                    default:
+                        console.log('Unknown Event');
+                    break;
+                }
+                if (message.event === 'USER_AUTHENTICATED') {
+                    
+                }
+                if(message.event === 'WORKER_NOTIFICATION') {
+                    
+                }
+            }catch (e) {
+                // hmm.....
+            }
+            
+            //sock.close();
+        };
+
+        sock.onclose = function() {
+            console.log('close');
+            document.getElementById('disconnected').style.display = 'block';
+        };
+
+        function notifyMe(message) {
+            // Let's check if the browser supports notifications
+            if (!("Notification" in window)) {
+                alert("Tjis browser does not support desktop notification");
+            }
+
+            // Let's check whether notification permissions have already been granted
+            else if (Notification.permission === "granted") {
+                // If it's okay let's create a notification
+                var options = {
+                    body: message.body,
+                    requireInteraction: true
+                }
+                var notification = new Notification(message.title, options);
+            }
+
+            // Otherwise, we need to ask the user for permission
+            else if (Notification.permission !== "denied") {
+                Notification.requestPermission(function (permission) {
+                // If the user accepts, let's create a notification
+                if (permission === "granted") {
+                    var options = {
+                        body: message.body,
+                        requireInteraction: true
+                    }
+                    var notification = new Notification(message.title, options);
+                }
+                });
+            }
+
+            // At last, if the user has denied notifications, and you 
+            // want to be respectful there is no need to bother them any more.
+        }
+
+        function postMessage() {
+            var title = document.getElementById('title').value;
+
+            if(title) {
+                fetch('http://localhost:3000/users/sockJS/notify', {
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin':'*',
+                    },
+                    body: JSON.stringify({
+                        "notification": {
+                            "title": title,
+                            "userId": 'ji',
+                            "event": "WORKER_NOTIFICATION",
+                            "payload": {
+                                
+                            }
+                        }
+                    })
+                })
+                .then((response) => {
+                    if(response.status === 200) return response.json();
+                    throw new Error('Sometjing went wrong on api server!');
+                })
+                .then((result) => {
+                    console.log(result);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+            }else {
+                alert('Please enter some title');
+            }
+        }
+
+        function makeid() {
+            var text = "";
+            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgjijklmnopqrstuvwxyz0123456789";
+
+            for (var i = 0; i < 5; i++)
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+            return text;
+        }
+    </script>
+</body>
+</html>
