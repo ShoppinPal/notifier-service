@@ -1,6 +1,6 @@
 import { INVALID_JSON } from './eventConstants';
 import * as constants from './eventConstants';
-import { messageIdsCache } from '../sockJS';
+import { messageIdsCache, users } from '../sockJS';
 /* Utility functions */
 
 let isMessageValid = (message) => {
@@ -49,6 +49,16 @@ let deleteMessageIdFromCache = (messageId) => {
             return resolve(`${messageId} markd for deletion in cache`);
         }
     });
+}
+
+let removeLoggedOutUserSocket = (userId, socketId) => {
+    if (users[userId]) {
+        let index = users[userId].indexOf(socketId);
+        if (index >= 0) {
+            users[userId].splice(index, 1);
+        }
+        console.log('Logged out user socket id removed');
+    }
 }
 
 export {isMessageValid, prepareMessage, addMessageIdToCache, deleteMessageIdFromCache};

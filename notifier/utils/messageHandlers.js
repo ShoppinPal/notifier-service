@@ -42,6 +42,10 @@ let messageHandlers = (conn, connectionToUserMapping, message, users) => {
                 emitter.emit(constants.USER_FETCH_NOTIFICATION_HISTORY, { conn, userId });
             break;
 
+            case constants.USER_LOGOUT:
+                emitter.emit(constants.USER_LOGOUT, {conn, userId});
+            break;
+
             case constants.NOTIFICATION_RECEIVED_ACK:
                 let messageId = messageObject.messageId;
                 emitter.emit(constants.NOTIFICATION_RECEIVED_ACK, { conn, messageId });

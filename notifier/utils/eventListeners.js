@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import * as constants from './eventConstants';
-import { addMessageIdToCache, deleteMessageIdFromCache } from './utility';
+import { addMessageIdToCache, deleteMessageIdFromCache, removeLoggedOutUserSocket } from './utility';
 import { 
     deleteMessageFromQueue,
     addNotifiedMessagesToHistory,
@@ -20,8 +20,13 @@ let userAuthenticatedListener = (conn) => {
     conn.write(JSON.stringify({event: constants.USER_AUTHENTICATED, payload: {}}));
 }
 
+let userLogoutListener = ({conn, userId}) => {
+    console.log('userLogout Listener');
+    removeLoggedOutUserSocket(userId, conn.id);
+}
+
 let fetchNotificationHistoryListener = ({conn, userId}) => {
-    console.log('userAuthenticated Listener');
+    console.log('fetchNotificationHistory Listener');
     fetchFromDBAndNotify(conn, userId); // fetch previous notifications from database that were not delivered due to client was not connected!
 }
 

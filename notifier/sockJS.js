@@ -129,4 +129,4 @@ echo.installHandlers(server2, {prefix:'/echo'});
 server2.listen(4000);
 
 
-export {connections, messageIdsCache};
+export {connections, users, messageIdsCache};
