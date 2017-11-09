@@ -61,4 +61,10 @@ let removeLoggedOutUserSocket = (userId, socketId) => {
     }
 }
 
-export {isMessageValid, prepareMessage, addMessageIdToCache, deleteMessageIdFromCache};
+export {
+    isMessageValid, 
+    prepareMessage, 
+    addMessageIdToCache, 
+    deleteMessageIdFromCache, 
+    removeLoggedOutUserSocket
+};
