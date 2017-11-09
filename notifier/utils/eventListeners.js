@@ -113,6 +113,7 @@ let registerListeners = () => {
     emitter = new EventEmitter();
     emitter.addListener(constants.USER_AUTHENTICATE, userAuthenticateListener);
     emitter.addListener(constants.USER_AUTHENTICATED, userAuthenticatedListener);
+    emitter.addListener(constants.USER_LOGOUT, userLogoutListener);
     emitter.addListener(constants.NOTIFICATION_RECEIVED_ACK, notificationReceivedAckListener);
     emitter.addListener(constants.NOTIFICATION_BULK_RECEIVED_ACK, notificationBulkReceivedAckListener);
     emitter.addListener(constants.USER_FETCH_NOTIFICATION_HISTORY, fetchNotificationHistoryListener);
