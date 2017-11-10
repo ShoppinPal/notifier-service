@@ -34,7 +34,7 @@ let addMessageIdToCache = (messageId) => {
         }else {
             // add this messageId to cache so that subsequent message ack do not make mongodb calls.
             // Proceed and make a mongodb call to delete message with given messageId in the next step. 
-            messageIdsCache[messageId] = {state: constants.STATE_DELETING, time: Date()};
+            messageIdsCache[messageId] = {state: constants.STATE_DELETING};
             return resolve({state: constants.DELETE_FROM_QUEUE, message: 'messageId added to cache, calling mongo to delete it in next step'});
         }
     });
