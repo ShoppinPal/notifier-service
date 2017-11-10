@@ -69,8 +69,8 @@ let clearMessageIdsCache = () => {
                     delete messageIdsCache[messageId];
             }
         });
-        console.log('\n\n############ messageIdsCache cleaned up ##############\n\n');
-    }, 1000 * 60 * 5);
+        console.log('\n\n############ messageIdsCache cleaned up ##############\n\n', messageIdsCache);
+    }, 1000 * 60 * 1);
 }
 
 export {
@@ -78,5 +78,6 @@ export {
     prepareMessage, 
     addMessageIdToCache, 
     deleteMessageIdFromCache, 
-    removeLoggedOutUserSocket
+    removeLoggedOutUserSocket,
+    clearMessageIdsCache
 };
