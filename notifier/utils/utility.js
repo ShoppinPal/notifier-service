@@ -46,7 +46,7 @@ let deleteMessageIdFromCache = (messageId) => {
 
         if (messageIdsCache[messageId]) {
             messageIdsCache[messageId] = {state: constants.STATE_DELETED, time: Date()};
-            return resolve(`${messageId} markd for deletion in cache`);
+            return resolve(`${messageId} marked for deletion in cache`);
         }
     });
 }
@@ -70,7 +70,7 @@ let clearMessageIdsCache = () => {
             }
         });
         console.log('\n\n############ messageIdsCache cleaned up ##############\n\n', messageIdsCache);
-    }, 1000 * 60 * 1);
+    }, 1000 * 60 * 5);
 }
 
 export {
