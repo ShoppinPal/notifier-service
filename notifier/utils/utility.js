@@ -45,7 +45,7 @@ let deleteMessageIdFromCache = (messageId) => {
         if (!messageId) return reject(`Invalid messageId: ${messageId}`);
 
         if (messageIdsCache[messageId]) {
-            messageIdsCache[messageId] = {state: constants.STATE_DELETED, time: Date()};
+            messageIdsCache[messageId] = {state: constants.STATE_DELETED};
             return resolve(`${messageId} marked for deletion in cache`);
         }
     });
