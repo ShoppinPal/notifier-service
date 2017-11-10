@@ -61,6 +61,18 @@ let removeLoggedOutUserSocket = (userId, socketId) => {
     }
 }
 
+let clearMessageIdsCache = () => {
+    let timerId = setInterval(() => {
+        Object.keys(messageIdsCache).forEach((messageId) => {
+            if (messageIdsCache[messageId].state && 
+                messageIdsCache[messageId].state === constants.STATE_DELETED) {
+                    delete messageIdsCache[messageId];
+            }
+        });
+        console.log('\n\n############ messageIdsCache cleaned up ##############\n\n');
+    }, 1000 * 60 * 5);
+}
+
 export {
     isMessageValid, 
     prepareMessage, 

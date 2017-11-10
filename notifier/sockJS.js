@@ -3,7 +3,7 @@ import http from 'http';
 import { registerListeners } from './utils/eventListeners';
 import { isAuthentic } from './utils/authenticate';
 import messageHandlers from './utils/messageHandlers';
-import {isMessageValid, prepareMessage} from './utils/utility';
+import {isMessageValid, prepareMessage, clearMessageIdsCache} from './utils/utility';
 import redis from 'redis';
 import { connectToMongoDB, addMessageToDB } from './utils/mongoDB';
 
@@ -93,6 +93,9 @@ let sendNotificationToBrowser = (message) => {
     }
 }
 
+/**
+ * SockJS server implementation....
+ */
 var echo = sockjs.createServer({ sockjs_url: 'http://cdn.jsdelivr.net/sockjs/1.0.1/sockjs.min.js' });
 console.log('hello I am working');
 connectToMongoDB();
@@ -127,6 +130,7 @@ registerListeners();
 echo.installHandlers(server2, {prefix:'/echo'});
 
 server2.listen(4000);
-
+// Periodically (every 5min) clear messageId cache
+clearMessageIdsCache();
 
 export {connections, users, messageIdsCache};
