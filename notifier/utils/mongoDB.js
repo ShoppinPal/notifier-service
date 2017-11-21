@@ -15,6 +15,7 @@ let addMessageToDB = (message) => {
     return new Promise((resolve, reject) => {
         checkDatabaseObject(_db)
         .then((DB) => {
+            message.createdAt = new Date();
             DB.collection('queue').insertOne(message, (err, result) => {
                 if (err) {
                     return reject(err);
