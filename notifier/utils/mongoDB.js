@@ -1,5 +1,6 @@
 import { MongoClient, ObjectID } from 'mongodb';
 import assert from 'assert';
+import logger from 'sp-json-logger';
 
 let _db = null;
 
@@ -7,7 +8,7 @@ let connectToMongoDB = () => {
     MongoClient.connect('mongodb://mongoDB:27017/notifications', function(err, db) {
         assert.equal(null, err);
         _db = db;
-        console.log("Connected successfully to mongodb server");
+        logger.debug('Connected successfully to mongodb server');
     });
 }
 
@@ -20,7 +21,7 @@ let addMessageToDB = (message) => {
                 if (err) {
                     return reject(err);
                 }
-                console.log('Added to db', message._id);
+                logger.debug(`Message added to db ${message._id}`);
                 return resolve(result);
             });
         })
@@ -86,7 +87,6 @@ let deleteBulkMessagesFromQueue = (ids) => {
             });
         }else {
             return reject('deleteBulkMessageFromQueue(ids): ids array invalid');
-            console.log('deleteBulkMessageFromQueue(ids): ids array invalid');
         }
     });
 }

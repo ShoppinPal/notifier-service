@@ -4,6 +4,7 @@ import * as constants from './eventConstants';
 import {isUserValid} from './authenticate';
 import {isMessageValid, prepareMessage} from './utility';
 import { fetchMessagesForUser } from './mongoDB';
+import logger from 'sp-json-logger';
 
 //let emitter = null;
 /*
@@ -65,12 +66,12 @@ let messageHandlers = (conn, connectionToUserMapping, message, users) => {
             break;
 
             default:
-                console.log('default case', messageObject);
+                logger.error({ message: 'MessageHandler: Unexpected event encountered', messageObject });
             break;
         }
         
     }else{
-        console.log('Invalid message', messageObject);
+        logger.error({ message: 'Invalid message', messageObject });
     }
 }
 

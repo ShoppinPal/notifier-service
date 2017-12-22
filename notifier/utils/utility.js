@@ -1,6 +1,7 @@
 import { INVALID_JSON } from './eventConstants';
 import * as constants from './eventConstants';
 import { messageIdsCache, users } from '../sockJS';
+import logger from 'sp-json-logger';
 /* Utility functions */
 
 let isMessageValid = (message) => {
@@ -57,7 +58,7 @@ let removeLoggedOutUserSocket = (userId, socketId) => {
         if (index >= 0) {
             users[userId].splice(index, 1);
         }
-        console.log('Logged out user socket id removed');
+        logger.debug(`Logged out user socket cleaned up. userId: ${userId}, socketId: ${socketId}`);
     }
 }
 
