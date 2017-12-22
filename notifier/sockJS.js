@@ -104,23 +104,24 @@ echo.on('connection', function(conn) {
     isAuthentic(conn.url)
     .then(() => {
         connections[conn.id] = conn;
+
+        conn.on('data', function(message) {
+            //conn.write(message);
+            //console.log(conn.id);
+            //console.log(users);
+            console.log('Cache', messageIdsCache);
+            messageHandlers(conn, connectionToUserMapping, message, users);
+        });
+        conn.on('close', function() {
+            cleanupOnDisconnect(conn.id);
+            console.log('connection closed');
+            /**
+             * Todo: Remove disconnected clients from queue or storage
+             */
+        });
     })
     .catch(() => {
         conn.close();
-    });
-    conn.on('data', function(message) {
-        //conn.write(message);
-        //console.log(conn.id);
-        //console.log(users);
-        console.log('Cache', messageIdsCache);
-        messageHandlers(conn, connectionToUserMapping, message, users);
-    });
-    conn.on('close', function() {
-        cleanupOnDisconnect(conn.id);
-        console.log('connection closed');
-        /**
-         * Todo: Remove disconnected clients from queue or storage
-         */
     });
 });
 
