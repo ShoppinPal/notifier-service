@@ -1,5 +1,6 @@
 import { MongoClient, ObjectID } from 'mongodb';
 import assert from 'assert';
+import logger from 'sp-json-logger';
 
 let _db = null;
 
@@ -7,7 +8,7 @@ let connectToMongoDB = () => {
     MongoClient.connect('mongodb://mongoDB:27017/notifications', function(err, db) {
         assert.equal(null, err);
         _db = db;
-        console.log("Connected successfully to mongodb server");
+        logger.debug('Connected successfully to mongodb server');
     });
 }
 
@@ -15,11 +16,12 @@ let addMessageToDB = (message) => {
     return new Promise((resolve, reject) => {
         checkDatabaseObject(_db)
         .then((DB) => {
+            message.createdAt = new Date();
             DB.collection('queue').insertOne(message, (err, result) => {
                 if (err) {
                     return reject(err);
                 }
-                console.log('Added to db', message._id);
+                logger.debug(`Message added to db ${message._id}`);
                 return resolve(result);
             });
         })
@@ -63,6 +65,65 @@ let deleteMessageFromQueue = (id) => {
     });
 }
 
+let deleteBulkMessagesFromQueue = (ids) => {
+    return new Promise((resolve, reject) => {
+        if (Array.isArray(ids)) {
+            checkDatabaseObject(_db)
+            .then((DB) => {
+                let idsToDelete = [];
+                ids.forEach((id) => {
+                    idsToDelete.push(new ObjectID(id));
+                });
+                
+                DB.collection('queue').deleteMany({_id: {$in: idsToDelete}}, (err, message) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve(message);
+                });
+            })
+            .catch((error) => {
+                return reject(error);
+            });
+        }else {
+            return reject('deleteBulkMessageFromQueue(ids): ids array invalid');
+        }
+    });
+}
+
+let addNotifiedMessagesToHistory = (messageId) => {
+    return new Promise((resolve, reject) => {
+        checkDatabaseObject(_db)
+        .then((DB) => {
+            // (1) Find messages from messageId(s)
+            let idsToMove = [];
+            let query = {};
+            if (Array.isArray(messageId)) {
+                messageId.forEach((id) => {
+                    idsToMove.push(new ObjectID(id));
+                });
+                query['_id'] = {};
+                query['_id']['$in'] = idsToMove;
+            }else {
+                query = {_id: new ObjectID(messageId)};
+            }
+            DB.collection('queue').find(query)
+            .toArray((err, messages) => {
+                if (err) return reject(err);
+                console.log('Moving to notifHistory', messages);
+                // (2) Add them to notif history collection
+                DB.collection('notifHistory').insertMany(messages, {upsert: true}, (err, result) => {
+                    if (err) return reject(err);
+                    return resolve('Notified messages add to history');
+                });
+            });
+        })
+        .catch((error) => {
+            return reject(error);
+        });
+    });
+}
+
 let disconnectDatabaseObject = (_db) => {
     checkDatabaseObject(_db)
     .then((DB) => {
@@ -83,4 +144,12 @@ let checkDatabaseObject = (_db) => {
     })
 }
 
-export {connectToMongoDB, addMessageToDB, fetchMessagesForUser, deleteMessageFromQueue, disconnectDatabaseObject};
+export {
+    connectToMongoDB, 
+    addMessageToDB, 
+    fetchMessagesForUser, 
+    deleteMessageFromQueue, 
+    addNotifiedMessagesToHistory,
+    deleteBulkMessagesFromQueue, 
+    disconnectDatabaseObject
+};

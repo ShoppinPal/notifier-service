@@ -10,7 +10,8 @@
     "mongodb": "^2.2.33",
     "morgan": "~1.9.0",
     "redis": "^2.8.0",
-    "sockjs": "^0.3.19"
+    "sockjs": "^0.3.19",
+    "sp-json-logger": "^2.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

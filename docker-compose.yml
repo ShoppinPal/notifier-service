@@ -1,5 +1,14 @@
 version: "3.1"
 services:
+  web_proxy:
+    image: nginx:stable
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.warehouse.conf:/etc/nginx/conf.d/default.conf
+      - ./wait-for:/wait/wait-for
+    depends_on:
+      - web
   web:
     build: .
     env_file: .env

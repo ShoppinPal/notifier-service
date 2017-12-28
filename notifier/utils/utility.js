@@ -1,4 +1,7 @@
 import { INVALID_JSON } from './eventConstants';
+import * as constants from './eventConstants';
+import { messageIdsCache, users } from '../sockJS';
+import logger from 'sp-json-logger';
 /* Utility functions */
 
 let isMessageValid = (message) => {
@@ -22,4 +25,60 @@ let prepareMessage = (message, source) => {
     }
 }
 
-export {isMessageValid, prepareMessage};
+let addMessageIdToCache = (messageId) => {
+    return new Promise((resolve, reject) => {
+        if (!messageId) return reject(`Invalid messageId: ${messageId}`);
+
+        if (messageIdsCache[messageId]) {
+            // If messageId already in cache: Back off and don't proceed to make a DB call to delete it from mongodb Queue.
+            return resolve({state: constants.SKIP_DELETE_FROM_QUEUE, message:'messageId cache hit, skip mongo call'});
+        }else {
+            // add this messageId to cache so that subsequent message ack do not make mongodb calls.
+            // Proceed and make a mongodb call to delete message with given messageId in the next step. 
+            messageIdsCache[messageId] = {state: constants.STATE_DELETING};
+            return resolve({state: constants.DELETE_FROM_QUEUE, message: 'messageId added to cache, calling mongo to delete it in next step'});
+        }
+    });
+}
+
+let deleteMessageIdFromCache = (messageId) => {
+    return new Promise((resolve, reject) => {
+        if (!messageId) return reject(`Invalid messageId: ${messageId}`);
+
+        if (messageIdsCache[messageId]) {
+            messageIdsCache[messageId] = {state: constants.STATE_DELETED};
+            return resolve(`${messageId} marked for deletion in cache`);
+        }
+    });
+}
+
+let removeLoggedOutUserSocket = (userId, socketId) => {
+    if (users[userId]) {
+        let index = users[userId].indexOf(socketId);
+        if (index >= 0) {
+            users[userId].splice(index, 1);
+        }
+        logger.debug(`Logged out user socket cleaned up. userId: ${userId}, socketId: ${socketId}`);
+    }
+}
+
+let clearMessageIdsCache = () => {
+    let timerId = setInterval(() => {
+        Object.keys(messageIdsCache).forEach((messageId) => {
+            if (messageIdsCache[messageId].state && 
+                messageIdsCache[messageId].state === constants.STATE_DELETED) {
+                    delete messageIdsCache[messageId];
+            }
+        });
+        console.log('\n\n############ messageIdsCache cleaned up ##############\n\n', messageIdsCache);
+    }, 1000 * 60 * 5);
+}
+
+export {
+    isMessageValid, 
+    prepareMessage, 
+    addMessageIdToCache, 
+    deleteMessageIdFromCache, 
+    removeLoggedOutUserSocket,
+    clearMessageIdsCache
+};

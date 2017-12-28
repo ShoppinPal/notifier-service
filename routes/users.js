@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 import { sendMessageToBrowser } from '../firebase/FCM-messaging';
-import { publishToRedis } from '../notifier/utils/publishToRedis';
+import { publishToRedis } from '../utils/publishToRedis';
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {

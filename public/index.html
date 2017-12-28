@@ -18,12 +18,12 @@
             </section>
         </section>
         <script>
-            var sock = new SockJS('http://localhost:4000/echo');
+            var sock = new SockJS('http://localhost:4000/echo?token=qweq');
             var userId = makeid();
 
             sock.onopen = function() {
                 console.log('open');
-                sock.send(JSON.stringify({event: 'USER_AUTHENTICATE', payload: 'test', userId: userId}));
+                sock.send(JSON.stringify({event: 'USER_AUTHENTICATE', payload: 'test', userId: 'hi'}));
                 document.getElementById('disconnected').style.display = 'none';
                 //sock.send('test');
             };
@@ -33,10 +33,42 @@
                 try{
                     let message = JSON.parse(e.data);
 
-                    if(message._id) {
-                        notifyMe(message);
-                        sock.send(JSON.stringify({event: 'NOTIFICATION_RECEIVED_ACK', messageId: message._id, payload: {}}));
-                        console.log('notification ack sent');
+                    switch (message.event) {
+                        case 'USER_AUTHENTICATED':
+                            console.log('fetching history...');
+                            sock.send(JSON.stringify({event: 'USER_FETCH_NOTIFICATION_HISTORY', payload: {}, userId: 'hi'}));
+                        break;
+
+                        case 'WORKER_NOTIFICATION':
+                            notifyMe(message);
+                            sock.send(JSON.stringify({event: 'NOTIFICATION_RECEIVED_ACK', messageId: message._id, payload: {}, userId: 'hi'}));
+                            console.log('notification ack sent');
+                        break;
+
+                        case 'NOTIFICATION_HISTORY':
+                            let ids = [];
+                            message.notifications.forEach((notif) => {
+                                ids.push(notif._id);
+                                notifyMe(notif);
+                            });
+                            sock.send(JSON.stringify({event: 'NOTIFICATION_BULK_RECEIVED_ACK', payload: {}, messageIds: ids, userId: 'hi'}));
+                        break;
+
+                        case 'NOTIFICATION_HISTORY_EMPTY':
+                            console.log('Up to date with notifications!');
+                        break;
+
+                        case 'MESSAGES_DELETED':
+
+                        break;
+
+                        case 'BULK_MESSAGES_DELETED':
+
+                        break;
+
+                        default:
+                            console.log('Unknown Event');
+                        break;
                     }
                 }catch (e) {
                     // hmm.....
@@ -97,7 +129,7 @@
                         body: JSON.stringify({
                             "notification": {
                                 "title": title,
-                                "userId": userId,
+                                "userId": 'hi',
                                 "event": "WORKER_NOTIFICATION",
                                 "payload": {
                                     
