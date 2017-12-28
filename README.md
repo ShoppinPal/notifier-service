@@ -8,6 +8,8 @@ Steps to run:
 
 3. `touch .env` (Note: As this is skeleton, there is nothing inside `.env` yet. So just create this file and leave it as it is.)
 
+    Use `env.example` to fill up `.env` file.
+
 4. `docker-compose up --build`
 
 5. Once server is up and running
