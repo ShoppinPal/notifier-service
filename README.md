@@ -8,9 +8,13 @@ Realtime push noification service using websockets. Consumers of this service ne
 
 2. `cd notifier-service`
 
-3. `cp .env.example .env` (Note: As this is skeleton, there is nothing inside `.env` yet. So just create this file and leave it as it is.)
+3. `cp env.example .env` (Note: As this is skeleton, there is nothing inside `.env` yet. So just create this file and leave it as it is.)
 
-    Use `.env.example` to fill up `.env` file.
+    Use `env.example` to fill up `.env` file.
+
+4. `cd notifier`
+
+5.  `cp env.example .env` and fill up required env attributes.
 
 4. `docker-compose up --build`
 
