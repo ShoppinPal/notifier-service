@@ -96,7 +96,7 @@ let sendNotificationToBrowser = (message) => {
 /**
  * SockJS server implementation....
  */
-var echo = sockjs.createServer({ sockjs_url: 'http://cdn.jsdelivr.net/sockjs/1.0.1/sockjs.min.js' });
+var echo = sockjs.createServer({ sockjs_url: process.env.SOCKJS_URL });
 console.log('hello I am working');
 connectToMongoDB();
 handleSubscription(users);  // setup redis subscriber for 'notification' channel!
@@ -115,9 +115,6 @@ echo.on('connection', function(conn) {
         conn.on('close', function() {
             cleanupOnDisconnect(conn.id);
             console.log('connection closed');
-            /**
-             * Todo: Remove disconnected clients from queue or storage
-             */
         });
     })
     .catch(() => {
