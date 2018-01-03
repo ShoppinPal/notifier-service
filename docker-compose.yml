@@ -23,6 +23,7 @@ services:
   sockjs:
     build:
       context: ./notifier
+    env_file: ./notifier/.env
     command: "npm start"
     depends_on:
       - redis

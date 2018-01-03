@@ -2,13 +2,14 @@ var express = require('express');
 var router = express.Router();
 import { sendMessageToBrowser } from '../firebase/FCM-messaging';
 import { publishToRedis } from '../utils/publishToRedis';
+import { authRequest } from '../middleware/authRequest';
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-router.post('/sockJS/notify', (req, res, next) => {
+router.post('/sockJS/notify', authRequest, (req, res, next) => {
   if(req.body && req.body.notification) {
     publishToRedis(req.body.notification)
     .then(() => {

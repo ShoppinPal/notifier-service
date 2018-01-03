@@ -6,7 +6,8 @@
 <body>
     <h1>Open browser console window to see more info in action</h1>
     <section>
-        <input type="text" name="title" id="title" placeholder="Enter random title">
+        <label>Notification title</label> <input type="text" name="title" id="title" placeholder="Enter random title"> </br>
+        <label>Auth-Key value</label> <input type="text" name="authKey" id="authKey" placeholder="Enter auth key value"> (Note: This value should match the one with AUTH_KEY specified in .env file of notifier-web service) </br>
         <button id="sendNotif" onclick="postMessage()">Notify</button> <br/>
         <ol>
             <li>Tjis notify button impersonates a worker finished processing and is sending a notification to our notification-service</li>
@@ -124,8 +125,9 @@
 
         function postMessage() {
             var title = document.getElementById('title').value;
+            var authValue = document.getElementById('authKey').value;
 
-            if(title) {
+            if(title && authValue) {
                 fetch('http://localhost:3000/users/sockJS/notify', {
                     method: 'post',
                     headers: {
@@ -154,7 +156,7 @@
                     console.log(error);
                 });
             }else {
-                alert('Please enter some title');
+                alert('Please enter title and auth-key');
             }
         }
 

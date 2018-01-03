@@ -1,12 +1,20 @@
 # Sockjs notifier service
 
-Steps to run:
+Realtime push noification service using websockets. Consumers of this service need to send a post request along with `auth-key` header which will help authenticate the request. Notifications will be delivered to clients once they are connected. In the meantime undelivered notifications will be stored in a queue (mongodb).
 
-1. `git clone https://github.com/yogesh8177/sockjs-notifier.git`
+# Steps to run:
 
-2. `cd sockjs-notifier`
+1. `git clone https://github.com/ShoppinPal/notifier-service.git`
 
-3. `touch .env` (Note: As this is skeleton, there is nothing inside `.env` yet. So just create this file and leave it as it is.)
+2. `cd notifier-service`
+
+3. `cp env.example .env` (Note: As this is skeleton, there is nothing inside `.env` yet. So just create this file and leave it as it is.)
+
+    Use `env.example` to fill up `.env` file.
+
+4. `cd notifier`
+
+5.  `cp env.example .env` and fill up required env attributes.
 
 4. `docker-compose up --build`
 
